@@ -15,10 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,13 +26,22 @@ jobs:
       
       - name: Copy files to deployment directory
         run: |
-          mkdir -p ./_site
-          cp -r ./* ./_site/
-          rm -rf ./_site/.github
+          mkdir -p _site
+          cp -r index.html _site/
+          cp -r README.md _site/
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
-      
+        with:
+          path: "_site"
+  
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2 
